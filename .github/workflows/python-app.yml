@@ -1,6 +1,6 @@
 name: Build Windows Executable
 
-  on:
+  on: 
     workflow_dispatch:  # 手动触发
     push:
       branches: [ main ]
