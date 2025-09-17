@@ -60,7 +60,7 @@ def main():
     print("✅ 数据库连接成功")
     
     # 设置服务地址
-    host = '127.0.0.1'
+    host = '0.0.0.0'
     port = 8073
     web_url = f"http://{host}:{port}/index.html"
     
