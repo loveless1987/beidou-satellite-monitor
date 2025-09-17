@@ -1,8 +1,10 @@
 name: Build Windows Executable
+
 on:
     workflow_dispatch:
     push:
       branches: [ main ]
+
 jobs:
     build-windows:
       runs-on: windows-latest
@@ -26,7 +28,7 @@ jobs:
           pyinstaller --onefile --console --name="BeidouMonitor" --add-data="index.html;." app_launcher_fixed.py
 
       - name: Upload executable
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: BeidouMonitor-exe
           path: dist/BeidouMonitor.exe
