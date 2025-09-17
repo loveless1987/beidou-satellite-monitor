@@ -206,7 +206,7 @@ class OracleExecutor:
 
 # 数据库连接配置
 DB_CONFIG = {
-    'host': '10.211.55.5',        # 修改为你的Oracle服务器地址
+    'host': '192.168.44.8',        # 修改为你的Oracle服务器地址
     'port': 12223,               # 修改为你的端口
     'service_name': 'swzdh',     # 修改为你的服务名
     'username': 'swzdh', # 修改为你的用户名
@@ -337,7 +337,7 @@ def main():
         logger.info("启动Oracle SQL执行API服务...")
         app.run(
             host='0.0.0.0',
-            port=8071,
+            port=8073,
             debug=True,
             threaded=True
         )
