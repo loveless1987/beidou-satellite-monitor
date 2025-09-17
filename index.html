@@ -1,0 +1,805 @@
+<html><head>
+<link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+<link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900" onload="this.rel='stylesheet'" rel="stylesheet"/>
+<title>北斗卫星数据到报情况</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<meta charset="utf-8"/>
+<style type="text/tailwindcss">
+      :root {
+        --primary-color: #1173d4;
+      }
+      .online-status {
+        color: #22c55e;
+        background-color: rgba(34, 197, 94, 0.1);
+      }
+      .offline-status {
+        color: #ef4444;
+        background-color: rgba(239, 68, 68, 0.1);
+      }
+      
+      /* 自定义滚动条样式 */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #374151;
+        border-radius: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #6b7280;
+        border-radius: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+      }
+      
+      /* hover卡片样式 */
+      .hover-card {
+        transition: all 0.2s ease-in-out;
+      }
+      .hover-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        border-color: #374151;
+      }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200" style='font-family: Inter, "Noto Sans", sans-serif;'>
+<div class="flex h-screen w-full flex-col">
+<header class="flex items-center justify-between border-b border-gray-700 px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 text-[var(--primary-color)]">
+<span class="material-symbols-outlined text-3xl">satellite_alt</span>
+<h1 class="text-xl font-bold text-white">北斗卫星数据监控</h1>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 rounded-md bg-gray-800 px-3 py-1.5">
+<span class="material-symbols-outlined text-gray-400">notifications</span>
+</div>
+<div class="flex items-center gap-2 rounded-md bg-gray-800 px-3 py-1.5">
+<span class="material-symbols-outlined text-gray-400">settings</span>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDllX_cWzSrdBKQo2yhiDuPQduDbCV0YWEdorRByXBKWS28CWlqV28W72rvia7Dyh5C6ajm65Fc9brbL66fJGO5iYynSDOTKZT4azVDiuvPTxUZ06ES8XDuiDC6GZGBrL_jvx9goyb2BJUDFrNbjIP9fZeS4Re6PA3C3eh8HbQYr7AJzJ8gSI9b38pPp2DGhRbdsCChp7ZM71gvVrdcq-9uV2GkaLNl_Vj4DIdykic60aA5P8_IenKFiMDwXvG1lLIo1d5gDwK5kCTo");'></div>
+</div>
+</header>
+<main class="flex flex-1 flex-col gap-6 p-6 overflow-hidden">
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<h2 class="text-3xl font-bold text-white">北斗卫星监控总览</h2>
+<div class="text-sm text-gray-400" id="lastUpdateTime">
+最后更新: <span id="updateTimeText">加载中...</span>
+</div>
+</div>
+
+<!-- 统计卡片 -->
+<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+<div class="rounded-lg border border-gray-700 bg-gray-800 p-4">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm text-gray-400">总站点数</p>
+<p class="text-2xl font-bold text-white" id="totalStations">-</p>
+</div>
+<span class="material-symbols-outlined text-blue-400 text-3xl">satellite_alt</span>
+</div>
+</div>
+
+<div class="rounded-lg border border-gray-700 bg-gray-800 p-4">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm text-gray-400">正常站点</p>
+<p class="text-2xl font-bold text-green-400" id="onlineStations">-</p>
+</div>
+<span class="material-symbols-outlined text-green-400 text-3xl">check_circle</span>
+</div>
+</div>
+
+<div id="offlineCard" class="rounded-lg border border-gray-700 bg-gray-800 p-4 hover-card">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm text-gray-400">离线站点</p>
+<p class="text-2xl font-bold text-red-400" id="offlineStations">-</p>
+</div>
+<span class="material-symbols-outlined text-red-400 text-3xl">error</span>
+</div>
+</div>
+
+<div id="rainCard" class="rounded-lg border border-gray-700 bg-gray-800 p-4 hover-card">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm text-gray-400">雨量站</p>
+<p class="text-2xl font-bold text-blue-400" id="rainStations">-</p>
+</div>
+<span class="material-symbols-outlined text-blue-400 text-3xl">water_drop</span>
+</div>
+</div>
+
+<div id="riverCard" class="rounded-lg border border-gray-700 bg-gray-800 p-4 hover-card">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm text-gray-400">水文站</p>
+<p class="text-2xl font-bold text-cyan-400" id="riverStations">-</p>
+</div>
+<span class="material-symbols-outlined text-cyan-400 text-3xl">waves</span>
+</div>
+</div>
+
+<div id="moistureCard" class="rounded-lg border border-gray-700 bg-gray-800 p-4 hover-card">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm text-gray-400">墒情站</p>
+<p class="text-2xl font-bold text-yellow-400" id="moistureStations">-</p>
+</div>
+<span class="material-symbols-outlined text-yellow-400 text-3xl">agriculture</span>
+</div>
+</div>
+</div>
+</div>
+<div class="rounded-lg border border-gray-700 bg-gray-800 p-4">
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-gray-300" for="station-name">测站名称</label>
+<input class="form-input rounded-md border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)]" id="station-name" placeholder="输入名称" type="text"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-gray-300" for="station-type">站点类型</label>
+<select class="form-select rounded-md border-gray-600 bg-gray-700 text-white focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)]" id="station-type">
+<option value="">所有类型</option>
+<option value="堡垒雨量站">堡垒雨量站</option>
+<option value="加密雨量站">加密雨量站</option>
+<option value="水文站">水文站</option>
+<option value="补短板">补短板</option>
+<option value="地埋式水位计">地埋式水位计</option>
+<option value="墒情站">墒情站</option>
+</select>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-sm font-medium text-gray-300" for="beidou-status">北斗状态</label>
+<select class="form-select rounded-md border-gray-600 bg-gray-700 text-white focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)]" id="beidou-status">
+<option value="">所有状态</option>
+<option value="正常">正常</option>
+<option value="离线">离线</option>
+</select>
+</div>
+<div class="flex flex-col gap-2 xl:col-span-2">
+<label class="text-sm font-medium text-gray-300" for="date-range">时间范围</label>
+<div class="flex items-center gap-2">
+<input class="form-input w-full rounded-md border-gray-600 bg-gray-700 text-white focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)]" type="date"/>
+<span class="text-gray-400">-</span>
+<input class="form-input w-full rounded-md border-gray-600 bg-gray-700 text-white focus:border-[var(--primary-color)] focus:ring-[var(--primary-color)]" type="date"/>
+</div>
+</div>
+<div class="flex items-end justify-end xl:col-start-6">
+<button id="searchBtn" class="flex h-10 w-full items-center justify-center gap-2 rounded-md bg-[var(--primary-color)] px-4 text-white hover:bg-opacity-80">
+<span class="material-symbols-outlined">search</span>
+<span>查询</span>
+</button>
+</div>
+</div>
+</div>
+<div class="rounded-lg border border-gray-700 bg-gray-800" style="height: calc(100vh - 120px); min-height: 400px;">
+<div class="h-full overflow-y-auto custom-scrollbar">
+<table class="w-full text-left">
+<thead class="sticky top-0 bg-gray-800 z-10 shadow-md">
+<tr class="border-b border-gray-700">
+<th class="px-4 py-3 text-sm font-medium text-gray-300">序号</th>
+<th class="px-4 py-3 text-sm font-medium text-gray-300">测站编码</th>
+<th class="px-4 py-3 text-sm font-medium text-gray-300">测站名称</th>
+<th class="px-4 py-3 text-sm font-medium text-gray-300">站点类型</th>
+<th class="px-4 py-3 text-sm font-medium text-gray-300">区县</th>
+<th class="px-4 py-3 text-sm font-medium text-gray-300">北斗卫星状态</th>
+<th class="px-4 py-3 text-sm font-medium text-gray-300">最后数据时间</th>
+<th class="px-4 py-3 text-sm font-medium text-gray-300">报文数量</th>
+</tr>
+</thead>
+<tbody id="dataTableBody" class="divide-y divide-gray-700">
+<!-- 数据将通过JavaScript动态加载 -->
+<tr id="loadingRow">
+<td colspan="8" class="px-4 py-8 text-center text-gray-400">
+<div class="flex items-center justify-center gap-2">
+<span class="material-symbols-outlined animate-spin">refresh</span>
+正在加载数据...
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</div>
+
+<!-- 离线站点详细统计tooltip -->
+<div id="offlineTooltip" class="fixed bg-gray-800 border border-gray-600 rounded-lg p-4 shadow-xl z-50 hidden max-w-sm">
+    <div class="space-y-3" id="offlineTooltipContent">
+        <!-- 详细统计内容将通过JavaScript动态生成 -->
+    </div>
+</div>
+
+<!-- 通用站点详细统计tooltip -->
+<div id="stationTooltip" class="fixed bg-gray-800 border border-gray-600 rounded-lg p-4 shadow-xl z-50 hidden max-w-sm">
+    <div class="space-y-3" id="stationTooltipContent">
+        <!-- 详细统计内容将通过JavaScript动态生成 -->
+    </div>
+</div>
+
+<script>
+// API配置
+const API_BASE_URL = 'http://localhost:8071';
+let allStationData = []; // 存储所有站点数据
+let filteredData = []; // 存储过滤后的数据
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {
+    loadStationData();
+    setupEventListeners();
+});
+
+// 设置事件监听器
+function setupEventListeners() {
+    const searchBtn = document.getElementById('searchBtn');
+    const stationName = document.getElementById('station-name');
+    const stationType = document.getElementById('station-type');
+    const beidouStatus = document.getElementById('beidou-status');
+    const offlineCard = document.getElementById('offlineCard');
+    const rainCard = document.getElementById('rainCard');
+    const riverCard = document.getElementById('riverCard');
+    const moistureCard = document.getElementById('moistureCard');
+    
+    // 原有的搜索过滤事件
+    searchBtn.addEventListener('click', filterData);
+    stationName.addEventListener('input', filterData);
+    stationType.addEventListener('change', filterData);
+    beidouStatus.addEventListener('change', filterData);
+    
+    // 离线站点卡片hover事件
+    offlineCard.addEventListener('mouseenter', showOfflineTooltip);
+    offlineCard.addEventListener('mouseleave', hideOfflineTooltip);
+    
+    // 雨量站卡片hover事件
+    rainCard.addEventListener('mouseenter', (e) => showStationTooltip(e, ['堡垒雨量站', '加密雨量站'], '雨量站详情'));
+    rainCard.addEventListener('mouseleave', hideStationTooltip);
+    
+    // 水文站卡片hover事件
+    riverCard.addEventListener('mouseenter', (e) => showStationTooltip(e, ['水文站', '补短板', '地埋式水位计'], '水文站详情'));
+    riverCard.addEventListener('mouseleave', hideStationTooltip);
+    
+    // 墒情站卡片hover事件
+    moistureCard.addEventListener('mouseenter', (e) => showStationTooltip(e, ['墒情站'], '墒情站详情'));
+    moistureCard.addEventListener('mouseleave', hideStationTooltip);
+}
+
+// 调用API获取站点数据
+async function loadStationData() {
+    try {
+        showLoading(true);
+        
+        // 调用安全的预定义接口，不再传递SQL语句
+        const response = await fetch(`${API_BASE_URL}/stations/all`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.success) {
+            // 合并所有查询结果
+            allStationData = [];
+            data.results.forEach(result => {
+                if (result.success && result.result.rows) {
+                    result.result.rows.forEach(row => {
+                        const columns = result.result.columns;
+                        const station = {};
+                        columns.forEach((col, index) => {
+                            station[col] = row[index];
+                        });
+                        allStationData.push(station);
+                    });
+                }
+            });
+            
+            filteredData = [...allStationData];
+            sortData(filteredData);
+            renderTable(filteredData);
+            updateStatistics(allStationData);
+            updateLastUpdateTime();
+        } else {
+            throw new Error(data.error || '数据加载失败');
+        }
+        
+    } catch (error) {
+        console.error('加载数据失败:', error);
+        showError('数据加载失败: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// 数据排序函数
+function sortData(data) {
+    data.sort((a, b) => {
+        // 1. 首先按北斗卫星状态排序 - 离线优先
+        const statusA = a['北斗卫星状态'];
+        const statusB = b['北斗卫星状态'];
+        
+        const isOfflineA = statusA && (statusA.includes('离线') || statusA === '无数据');
+        const isOfflineB = statusB && (statusB.includes('离线') || statusB === '无数据');
+        
+        if (isOfflineA && !isOfflineB) return -1; // A离线，B正常，A排前面
+        if (!isOfflineA && isOfflineB) return 1;  // A正常，B离线，B排前面
+        
+        // 2. 然后按区县排序
+        const districtA = a['区县'] || '';
+        const districtB = b['区县'] || '';
+        
+        const districtCompare = districtA.localeCompare(districtB, 'zh-CN');
+        if (districtCompare !== 0) return districtCompare;
+        
+        // 3. 最后按站点类型排序
+        const typeA = a['站点类型'] || '';
+        const typeB = b['站点类型'] || '';
+        
+        return typeA.localeCompare(typeB, 'zh-CN');
+    });
+}
+
+// 过滤数据
+function filterData() {
+    const stationName = document.getElementById('station-name').value.toLowerCase().trim();
+    const stationType = document.getElementById('station-type').value;
+    const beidouStatus = document.getElementById('beidou-status').value;
+    
+    filteredData = allStationData.filter(station => {
+        // 按测站名称过滤
+        if (stationName && !station['测站名称'].toLowerCase().includes(stationName)) {
+            return false;
+        }
+        
+        // 按站点类型过滤
+        if (stationType && station['站点类型'] !== stationType) {
+            return false;
+        }
+        
+        // 按北斗状态过滤
+        if (beidouStatus) {
+            const status = station['北斗卫星状态'];
+            if (beidouStatus === '正常' && status !== '正常') {
+                return false;
+            }
+            if (beidouStatus === '离线' && !(status.includes('离线') || status === '无数据')) {
+                return false;
+            }
+        }
+        
+        return true;
+    });
+    
+    sortData(filteredData);
+    renderTable(filteredData);
+}
+
+// 渲染表格
+function renderTable(data) {
+    const tbody = document.getElementById('dataTableBody');
+    
+    if (data.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="px-4 py-8 text-center text-gray-400">
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">search_off</span>
+                        暂无数据
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = data.map((station, index) => {
+        const status = station['北斗卫星状态'];
+        const isOnline = status === '正常';
+        const statusClass = isOnline ? 'online-status' : 'offline-status';
+        const statusText = status;
+        
+        // 格式化时间
+        let formattedTime = '无数据';
+        if (station['最后数据时间']) {
+            try {
+                const date = new Date(station['最后数据时间']);
+                formattedTime = date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                formattedTime = station['最后数据时间'];
+            }
+        }
+        
+        return `
+            <tr class="hover:bg-gray-700/50">
+                <td class="px-4 py-3 text-sm text-gray-400">${index + 1}</td>
+                <td class="px-4 py-3 text-sm text-gray-200">${station['测站编码'] || ''}</td>
+                <td class="px-4 py-3 text-sm text-gray-200">${station['测站名称'] || ''}</td>
+                <td class="px-4 py-3 text-sm text-gray-200">${station['站点类型'] || ''}</td>
+                <td class="px-4 py-3 text-sm text-gray-200">${station['区县'] || ''}</td>
+                <td class="px-4 py-3 text-sm">
+                    <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${statusClass}">
+                        <span class="size-2 rounded-full bg-current"></span>
+                        ${statusText}
+                    </span>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-200">${formattedTime}</td>
+                <td class="px-4 py-3 text-sm text-gray-200">${station['报文数量'] || 0}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// 显示加载状态
+function showLoading(show) {
+    const loadingRow = document.getElementById('loadingRow');
+    if (show) {
+        if (loadingRow) {
+            loadingRow.style.display = 'table-row';
+        }
+    } else {
+        if (loadingRow) {
+            loadingRow.style.display = 'none';
+        }
+    }
+}
+
+// 显示错误信息
+function showError(message) {
+    const tbody = document.getElementById('dataTableBody');
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="8" class="px-4 py-8 text-center text-red-400">
+                <div class="flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">error</span>
+                    ${message}
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+// 更新统计信息
+function updateStatistics(data) {
+    const totalStations = data.length;
+    const onlineStations = data.filter(s => s['北斗卫星状态'] === '正常').length;
+    const offlineStations = data.filter(s => {
+        const status = s['北斗卫星状态'];
+        return status && (status.includes('离线') || status === '无数据');
+    }).length;
+    
+    // 按站点类型统计
+    const rainStations = data.filter(s => s['站点类型'] && (s['站点类型'].includes('堡垒雨量站') || s['站点类型'].includes('加密雨量站'))).length;
+    const riverStations = data.filter(s => s['站点类型'] && (s['站点类型'].includes('水文站') || s['站点类型'].includes('补短板') || s['站点类型'].includes('地埋式水位计'))).length;
+    const moistureStations = data.filter(s => s['站点类型'] && s['站点类型'].includes('墒情站')).length;
+    
+    // 更新页面显示
+    document.getElementById('totalStations').textContent = totalStations;
+    document.getElementById('onlineStations').textContent = onlineStations;
+    document.getElementById('offlineStations').textContent = offlineStations;
+    document.getElementById('rainStations').textContent = rainStations;
+    document.getElementById('riverStations').textContent = riverStations;
+    document.getElementById('moistureStations').textContent = moistureStations;
+    
+    // 控制台输出详细统计
+    console.log('数据统计:', {
+        '总站点数': totalStations,
+        '正常站点': onlineStations,
+        '离线站点': offlineStations,
+        '堡垒雨量站': rainStations,
+        '水文站': riverStations,
+        '墒情站': moistureStations,
+        '在线率': `${((onlineStations / totalStations) * 100).toFixed(1)}%`
+    });
+}
+
+// 更新最后更新时间
+function updateLastUpdateTime() {
+    const now = new Date();
+    const timeString = now.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    document.getElementById('updateTimeText').textContent = timeString;
+}
+
+// 计算离线站点详细统计
+function calculateOfflineDetails(data) {
+    // 筛选出所有离线站点（包括无数据）
+    const offlineStations = data.filter(station => {
+        const status = station['北斗卫星状态'];
+        return status && (status.includes('离线') || status === '无数据');
+    });
+    
+    if (offlineStations.length === 0) {
+        return {
+            total: 0,
+            byType: [],
+            maxOfflineDays: 0
+        };
+    }
+    
+    // 按类型统计离线站点
+    const typeStats = {};
+    let maxOfflineDays = 0;
+    
+    offlineStations.forEach(station => {
+        const stationType = station['站点类型'];
+        const status = station['北斗卫星状态'];
+        
+        // 统计类型
+        if (!typeStats[stationType]) {
+            typeStats[stationType] = 0;
+        }
+        typeStats[stationType]++;
+        
+        // 提取离线天数
+        const dayMatch = status.match(/离线(\d+\.?\d*)天/);
+        if (dayMatch) {
+            const days = parseFloat(dayMatch[1]);
+            if (days > maxOfflineDays) {
+                maxOfflineDays = days;
+            }
+        }
+    });
+    
+    // 计算各类型的总数和占比
+    const typeDetails = [];
+    const totalByTypeCount = {};
+    
+    // 先统计各类型的总数
+    data.forEach(station => {
+        const stationType = station['站点类型'];
+        if (!totalByTypeCount[stationType]) {
+            totalByTypeCount[stationType] = 0;
+        }
+        totalByTypeCount[stationType]++;
+    });
+    
+    // 生成详细统计
+    Object.keys(typeStats).forEach(type => {
+        const offlineCount = typeStats[type];
+        const totalCount = totalByTypeCount[type] || 0;
+        const percentage = totalCount > 0 ? ((offlineCount / totalCount) * 100).toFixed(1) : '0.0';
+        
+        typeDetails.push({
+            type: type,
+            offlineCount: offlineCount,
+            totalCount: totalCount,
+            percentage: percentage
+        });
+    });
+    
+    // 按离线数量排序
+    typeDetails.sort((a, b) => b.offlineCount - a.offlineCount);
+    
+    return {
+        total: offlineStations.length,
+        byType: typeDetails,
+        maxOfflineDays: maxOfflineDays
+    };
+}
+
+// 显示离线站点详细统计tooltip
+function showOfflineTooltip(event) {
+    const tooltip = document.getElementById('offlineTooltip');
+    const content = document.getElementById('offlineTooltipContent');
+    
+    // 计算详细统计
+    const offlineDetails = calculateOfflineDetails(allStationData);
+    
+    if (offlineDetails.total === 0) {
+        content.innerHTML = `
+            <div class="text-center text-gray-400">
+                <p class="text-sm font-medium text-green-400">太棒了！没有离线站点</p>
+            </div>
+        `;
+    } else {
+        // 生成简洁的统计信息
+        let html = `
+            <div class="mb-3">
+                <p class="text-sm font-medium text-white">离线站点详情</p>
+                <p class="text-xs text-gray-400">最长离线: ${offlineDetails.maxOfflineDays} 天</p>
+            </div>
+            <div class="space-y-2">
+        `;
+        
+        offlineDetails.byType.forEach(typeInfo => {
+            html += `
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-gray-300">${typeInfo.type}</span>
+                    <span class="text-red-400 font-medium">${typeInfo.offlineCount}个 (占比${typeInfo.percentage}%)</span>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        content.innerHTML = html;
+    }
+    
+    // 设置tooltip位置 - 智能判断左右位置
+    const rect = event.currentTarget.getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    const tooltipWidth = 240; // tooltip大概宽度
+    
+    // 如果右边空间不够，显示在左边
+    if (rect.right + tooltipWidth + 20 > windowWidth) {
+        tooltip.style.left = (rect.left - tooltipWidth - 10) + 'px';
+    } else {
+        tooltip.style.left = (rect.right + 10) + 'px';
+    }
+    tooltip.style.top = rect.top + 'px';
+    
+    // 显示tooltip
+    tooltip.classList.remove('hidden');
+}
+
+// 隐藏tooltip
+function hideOfflineTooltip() {
+    const tooltip = document.getElementById('offlineTooltip');
+    tooltip.classList.add('hidden');
+}
+
+// 计算特定类型站点的详细统计
+function calculateStationTypeDetails(data, targetTypes) {
+    // 筛选目标类型的站点
+    const typeStations = data.filter(station => {
+        const stationType = station['站点类型'];
+        return targetTypes.some(type => stationType && stationType.includes(type));
+    });
+    
+    if (typeStations.length === 0) {
+        return {
+            total: 0,
+            onlineCount: 0,
+            offlineCount: 0,
+            onlineRate: 0,
+            subtypes: []
+        };
+    }
+    
+    // 按子类型统计
+    const subtypeStats = {};
+    
+    typeStations.forEach(station => {
+        const stationType = station['站点类型'];
+        const status = station['北斗卫星状态'];
+        const isOnline = status === '正常';
+        
+        if (!subtypeStats[stationType]) {
+            subtypeStats[stationType] = {
+                total: 0,
+                online: 0,
+                offline: 0
+            };
+        }
+        
+        subtypeStats[stationType].total++;
+        if (isOnline) {
+            subtypeStats[stationType].online++;
+        } else {
+            subtypeStats[stationType].offline++;
+        }
+    });
+    
+    // 生成子类型详细信息
+    const subtypes = Object.keys(subtypeStats).map(type => ({
+        type: type,
+        total: subtypeStats[type].total,
+        online: subtypeStats[type].online,
+        offline: subtypeStats[type].offline,
+        onlineRate: subtypeStats[type].total > 0 ? 
+            ((subtypeStats[type].online / subtypeStats[type].total) * 100).toFixed(1) : '0.0'
+    }));
+    
+    // 总体统计
+    const totalCount = typeStations.length;
+    const onlineCount = typeStations.filter(s => s['北斗卫星状态'] === '正常').length;
+    const offlineCount = totalCount - onlineCount;
+    const onlineRate = totalCount > 0 ? ((onlineCount / totalCount) * 100).toFixed(1) : '0.0';
+    
+    return {
+        total: totalCount,
+        onlineCount: onlineCount,
+        offlineCount: offlineCount,
+        onlineRate: onlineRate,
+        subtypes: subtypes
+    };
+}
+
+// 显示站点类型详细统计tooltip
+function showStationTooltip(event, targetTypes, title) {
+    const tooltip = document.getElementById('stationTooltip');
+    const content = document.getElementById('stationTooltipContent');
+    
+    // 计算详细统计
+    const details = calculateStationTypeDetails(allStationData, targetTypes);
+    
+    if (details.total === 0) {
+        content.innerHTML = `
+            <div class="text-center text-gray-400">
+                <p class="text-sm font-medium">${title}</p>
+                <p class="text-xs text-gray-500">暂无此类型站点</p>
+            </div>
+        `;
+    } else {
+        // 生成详细统计HTML
+        let html = `
+            <div class="mb-3">
+                <p class="text-sm font-medium text-white">${title}</p>
+                <p class="text-xs text-gray-400">北斗卫星到报率: ${details.onlineRate}%</p>
+            </div>
+            <div class="space-y-2">
+        `;
+        
+        details.subtypes.forEach(subtype => {
+            html += `
+                <div class="text-xs">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-gray-300">${subtype.type}</span>
+                        <span class="text-blue-400 font-medium">到报率${subtype.onlineRate}%</span>
+                    </div>
+                    <div class="flex justify-between text-gray-400">
+                        <span>离线 ${subtype.offline}个</span>
+                        <span>总计 ${subtype.total}个</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        content.innerHTML = html;
+    }
+    
+    // 设置tooltip位置 - 智能判断左右位置
+    const rect = event.currentTarget.getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    const tooltipWidth = 240; // tooltip大概宽度
+    
+    // 如果右边空间不够，显示在左边
+    if (rect.right + tooltipWidth + 20 > windowWidth) {
+        tooltip.style.left = (rect.left - tooltipWidth - 10) + 'px';
+    } else {
+        tooltip.style.left = (rect.right + 10) + 'px';
+    }
+    tooltip.style.top = rect.top + 'px';
+    
+    // 显示tooltip
+    tooltip.classList.remove('hidden');
+}
+
+// 隐藏站点统计tooltip
+function hideStationTooltip() {
+    const tooltip = document.getElementById('stationTooltip');
+    tooltip.classList.add('hidden');
+}
+
+// 添加自动刷新功能
+setInterval(() => {
+    console.log('自动刷新数据...');
+    loadStationData();
+}, 300000); // 5分钟刷新一次
+</script>
+
+</body></html>

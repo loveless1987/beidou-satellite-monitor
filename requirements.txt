@@ -1,0 +1,5 @@
+# 北斗卫星状态监控系统依赖包
+Flask>=2.0.0
+Flask-CORS>=3.0.0
+oracledb>=1.0.0
+PyInstaller>=5.0.0
