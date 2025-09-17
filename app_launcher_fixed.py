@@ -87,7 +87,7 @@ def main():
     
     # 设置服务地址
     host = '127.0.0.1'
-    port = 8071
+    port = 8073
     web_url = f"http://{host}:{port}/index.html"
     
     print(f"🚀 正在启动Web服务...")
