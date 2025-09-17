@@ -25,7 +25,9 @@ jobs:
 
       - name: Build executable
         run: |
-          pyinstaller --onefile --console --name="BeidouMonitor" --add-data="index.html;." app_launcher_fixed.py
+          pyinstaller --onefile --console --name="BeidouMonitor" --add-data="index.html;." --hidden-import=cryptography 
+  --hidden-import=cryptography.hazmat --hidden-import=cryptography.hazmat.primitives --hidden-import=cryptography.hazmat.primitives.kdf 
+  --collect-all=cryptography --collect-all=oracledb app_launcher_fixed.py
 
       - name: Upload executable
         uses: actions/upload-artifact@v4
